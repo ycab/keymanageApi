@@ -43,23 +43,11 @@ public class RFIDController {
     @PostMapping("/edit")
     public String edit(HttpServletRequest request)
     {
-        String oper=request.getParameter("oper");
-        if(oper.equals("add"))
-        {
-
-        }
-        else if(oper.equals("edit"))
-        {
-            String id=request.getParameter("id");
-            String rfid=request.getParameter("rfid");
-            GoodsManage goodsManage=goodsManageRepository.findById(Integer.parseInt(id)).orElse(null);
-            goodsManage.setRfid(rfid);
-            goodsManageRepository.save(goodsManage);
-        }
-        else if(oper.equals("del"))
-        {
-
-        }
+        String id=request.getParameter("id");
+        String rfid=request.getParameter("rfid");
+        GoodsManage goodsManage=goodsManageRepository.findById(Integer.parseInt(id)).orElse(null);
+        goodsManage.setRfid(rfid);
+        goodsManageRepository.save(goodsManage);
         return "ok";
     }
 }

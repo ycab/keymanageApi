@@ -31,6 +31,7 @@ public class Apply {
     private String cabinetName;//柜子名称
     private String openid;//
     private String isApply;//申请状态，0为申请中，1为申请通过，2为申请未通过
+    private String applyTime;
 
     public Integer getId() {
         return id;
@@ -150,5 +151,13 @@ public class Apply {
 
     public void setIsApply(String isApply) {
         this.isApply = isApply;
+    }
+
+    public String getApplyTime() {
+        return applyTime;
+    }
+
+    public void setApplyTime(String applyTime) {
+        this.applyTime = applyTime;
     }
 }

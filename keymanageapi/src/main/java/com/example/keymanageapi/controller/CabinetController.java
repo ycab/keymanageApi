@@ -8,10 +8,14 @@ import com.example.keymanageapi.model.Cabinet;
 import com.example.keymanageapi.model.GoodsManage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 /**
@@ -36,9 +40,8 @@ public class CabinetController {
         String json= JSON.toJSONString(list);
         return json;
     }
+    @PostMapping("/add")
     public String add(HttpServletRequest request ) {
-        String oper = request.getParameter("oper");
-        if (oper.equals("add")) {
             String mac = request.getParameter("mac");
             String company = request.getParameter("company");
             String cabinetName = request.getParameter("cabinetName");
@@ -61,12 +64,11 @@ public class CabinetController {
                 goodsManage.setIsApply("1");
                 goodsManageRepository.save(goodsManage);
             }
-        }
-        String result="{"+"\"msg\":\"ok\""+"}";
-        return result;
+          String result="{"+"\"msg\":\"ok\""+"}";
+          return result;
     }
 
-    @GetMapping("/edit")
+    @PostMapping("/edit")
     public String edit(HttpServletRequest request ) {
         String id=request.getParameter("id");
         String mac=request.getParameter("mac");
@@ -107,7 +109,7 @@ public class CabinetController {
         String result="{"+"\"msg\":\"ok\""+"}";
         return result;
     }
-    @GetMapping("/del")
+    @PostMapping("/del")
     public String del(HttpServletRequest request ) {
         String[] idArray=null;
         idArray=request.getParameter("id").split(",");

@@ -46,42 +46,44 @@ public class UserController {
            {
                peopleManages.get(0).setPassword(newpassword);
                peopleManageRepository.save(peopleManages.get(0));
-               result="success";
+               result="{"+"\"msg\":\"ok\""+","+"\"info\":"+"\"修改成功\""+"}";
+               return result;
            }
        }
+        result="{"+"\"msg\":\"error\""+","+"\"info\":"+"\"密码错误\""+"}";
        return result;
     }
     @GetMapping("/getlist")
-    public String getlist(HttpSession session)
+    public String getlist(HttpServletRequest request)
     {
-        String company=session.getAttribute("company").toString();
+        String company=request.getParameter("company");
         List<PeopleManage> list=peopleManageRepository.findByCompanyAndAuthorityAndIsConfirm(company,"用户","1");
         String json= JSON.toJSONString(list);
         return json;
     }
+    @PostMapping("/add")
+    public String add(HttpServletRequest request, HttpSession session)
+    {
+        String userName=request.getParameter("userName");
+        String password=request.getParameter("password");
+        String department=request.getParameter("department");
+        String phone=request.getParameter("phone");
+        String company=request.getParameter("company");
+        String authority="用户";
+        PeopleManage user=new PeopleManage();
+        user.setUserName(userName);
+        user.setPassword(password);
+        user.setCompany(company);
+        user.setDepartment(department);
+        user.setPhone(phone);
+        user.setAuthority(authority);
+        peopleManageRepository.save(user);
+        String result="{"+"\"msg\":\"ok\""+"}";
+        return result;
+    }
     @PostMapping("/edit")
     public String edit(HttpServletRequest request, HttpSession session)
     {
-        String oper=request.getParameter("oper");
-        if(oper.equals("add"))
-        {
-            String userName=request.getParameter("userName");
-            String password=request.getParameter("password");
-            String department=request.getParameter("department");
-            String phone=request.getParameter("phone");
-            String company=session.getAttribute("company").toString();
-            String authority="用户";
-            PeopleManage user=new PeopleManage();
-            user.setUserName(userName);
-            user.setPassword(password);
-            user.setCompany(company);
-            user.setDepartment(department);
-            user.setPhone(phone);
-            user.setAuthority(authority);
-            peopleManageRepository.save(user);
-        }
-        else if(oper.equals("edit"))
-        {
             String id=request.getParameter("id");
             String name=request.getParameter("userName");
             String password=request.getParameter("password");
@@ -95,19 +97,20 @@ public class UserController {
             user.setPhone(phone);
             user.setAuthority(authority);
             peopleManageRepository.save(user);
-        }
-        else if(oper.equals("del"))
+        String result="{"+"\"msg\":\"ok\""+"}";
+        return result;
+    }
+    @PostMapping("/del")
+    public String del(HttpServletRequest request, HttpSession session)
+    {
+        String[] idArray=null;
+        idArray=request.getParameter("id").split(",");
+        for(int i=0;i<idArray.length;i++)
         {
-            String[] idArray=null;
-            idArray=request.getParameter("id").split(",");
-            for(int i=0;i<idArray.length;i++)
-            {
-                peopleManageRepository.deleteById(Integer.parseInt(idArray[i]));
-            }
-            //int id=Integer.parseInt(request.getParameter("id"));
-            //peopleManageRepository.deleteById(id);
+            peopleManageRepository.deleteById(Integer.parseInt(idArray[i]));
         }
-        return "ok";
+        String result="{"+"\"msg\":\"ok\""+"}";
+        return result;
     }
     @PostMapping("/pass")
     public String pass(HttpServletRequest request)
@@ -134,7 +137,7 @@ public class UserController {
     public String getapplylist(HttpServletRequest request, HttpSession session)
     {
         String id=request.getParameter("id");
-        String company=session.getAttribute("company").toString();
+        String company=request.getParameter("company");
         List<PeopleManage> list=peopleManageRepository.findByCompanyAndAuthorityAndIsConfirm(company,"用户","0");
         String json= JSON.toJSONString(list);
         return json;

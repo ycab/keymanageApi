@@ -10,6 +10,7 @@ import com.example.keymanageapi.model.Cabinet;
 import com.example.keymanageapi.model.GoodsManage;
 import com.example.keymanageapi.service.TemplateMsgService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,9 +42,9 @@ public class GoodsController {
     TemplateMsgService templateMsgService;
 
     @GetMapping("/cabinetforgoods/getlist")
-    public String getlist(HttpSession session)
+    public String getlist(HttpServletRequest request)
     {
-        String company=session.getAttribute("company").toString();
+        String company=request.getParameter("company");
         List<Cabinet> list=cabinetRepository.findByCompany(company);
         String json= JSON.toJSONString(list);
         return json;
@@ -51,35 +52,23 @@ public class GoodsController {
     @PostMapping("/cabinetforgoods/edit")
     public String edit(HttpServletRequest request )
     {
-        String oper=request.getParameter("oper");
-        if(oper.equals("add"))
+        String id=request.getParameter("id");
+        String cabinetName=request.getParameter("cabinetName");
+        String location=request.getParameter("location");
+
+        Cabinet cabinet=cabinetRepository.findById(Integer.parseInt(id)).orElse(null);
+        cabinet.setId(Integer.parseInt(id)); //该行代码是为了实现修改数据，去掉后会变成新增数据
+        cabinet.setCabinetName(cabinetName);
+        cabinet.setLocation(location);
+        cabinetRepository.save(cabinet);
+        List<GoodsManage> goodsManageList=goodsManageRepository.findByMac(cabinet.getMac());
+        for(int i=0;i<goodsManageList.size();i++)
         {
-
+            goodsManageList.get(i).setCabinetName(cabinetName);
+            goodsManageRepository.save(goodsManageList.get(i));
         }
-        else if(oper.equals("edit"))
-        {
-            String id=request.getParameter("id");
-            String cabinetName=request.getParameter("cabinetName");
-            String location=request.getParameter("location");
-
-            Cabinet cabinet=cabinetRepository.findById(Integer.parseInt(id)).orElse(null);
-            cabinet.setId(Integer.parseInt(id)); //该行代码是为了实现修改数据，去掉后会变成新增数据
-            cabinet.setCabinetName(cabinetName);
-            cabinet.setLocation(location);
-            cabinetRepository.save(cabinet);
-            List<GoodsManage> goodsManageList=goodsManageRepository.findByMac(cabinet.getMac());
-            for(int i=0;i<goodsManageList.size();i++)
-            {
-                goodsManageList.get(i).setCabinetName(cabinetName);
-                goodsManageRepository.save(goodsManageList.get(i));
-            }
-
-        }
-        else if(oper.equals("del"))
-        {
-
-        }
-        return "ok";
+        String result="{"+"\"msg\":\"ok\""+"}";
+        return result;
     }
 
     @GetMapping("/goods/getlist")
@@ -91,31 +80,19 @@ public class GoodsController {
         List<GoodsManage> list= goodsManageRepository.findByMacOrderByCellNo(mac);
         String json= JSON.toJSONString(list);
         return json;
-
     }
     @PostMapping("/goods/edit")
     public String goodsedit(HttpServletRequest request)
     {
-        String oper=request.getParameter("oper");
-        if(oper.equals("add"))
-        {
-
-        }
-        else if(oper.equals("edit"))
-        {
-            String id=request.getParameter("id");
-            String goodName =request.getParameter("goodName");
-            String needApproved=request.getParameter("needApproved");
-            GoodsManage goodsManage=goodsManageRepository.findById(Integer.parseInt(id)).orElse(null);
-            goodsManage.setGoodName(goodName);
-            goodsManage.setNeedApproved(needApproved);
-            goodsManageRepository.save(goodsManage);
-        }
-        else if(oper.equals("del"))
-        {
-
-        }
-        return "ok";
+        String id=request.getParameter("id");
+        String goodName =request.getParameter("goodName");
+        String needApproved=request.getParameter("needApproved");
+        GoodsManage goodsManage=goodsManageRepository.findById(Integer.parseInt(id)).orElse(null);
+        goodsManage.setGoodName(goodName);
+        goodsManage.setNeedApproved(needApproved);
+        goodsManageRepository.save(goodsManage);
+        String result="{"+"\"msg\":\"ok\""+"}";
+        return result;
     }
 
     @PostMapping("/pass")
@@ -150,13 +127,35 @@ public class GoodsController {
         return "ok";
     }
     @GetMapping("/getapplylist")
-    public String getapplylist(HttpServletRequest request, HttpSession session)
+    public String getapplylist(HttpServletRequest request)
     {
-        String company=session.getAttribute("company").toString();
+        String company=request.getParameter("company");
         List<Apply> list=applyRepository.findByCompanyAndIsApply(company,"0");
         String json= JSON.toJSONString(list);
         return json;
     }
+    @GetMapping("/getapplyrecord")
+    public String getapplyrecord(HttpServletRequest request,HttpSession session)
+    {
+        String company=request.getParameter("company");
+        List<Apply> list=applyRepository.findByCompany(company);
+        for(int i=0;i<list.size();i++)
+        {
+            if(list.get(i).getIsApply().equals("0"))
+            {
+                list.get(i).setIsApply("申请中");
+            }
+            else if(list.get(i).getIsApply().equals("1"))
+            {
+                list.get(i).setIsApply("申请通过");
+            }
+            else if(list.get(i).getIsApply().equals("2"))
+            {
+                list.get(i).setIsApply("申请不通过");
+            }
 
-
+        }
+        String json= JSON.toJSONString(list);
+        return json;
+    }
 }
